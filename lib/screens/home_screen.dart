@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../biometrics/biometric_service.dart';
 import '../core/theme.dart';
-import '../widgets/call_indicator.dart';
+import 'admin_screen.dart';
+import 'transfer_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,83 +11,201 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: SynapTheme.background,
       appBar: AppBar(
+        backgroundColor: SynapTheme.background,
+        elevation: 0,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AegisTheme.primaryBlue, AegisTheme.primaryCyan],
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.shield_outlined,
-                color: Colors.white,
-                size: 20,
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: SynapTheme.primaryBlue,
+              child: const Text(
+                'M',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Synap Guardian',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  'Synap Pay',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.3),
                 ),
                 Text(
-                  'Behavioral Biometrics Active',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AegisTheme.statusSafe,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  'Secured by Indian Banking Rails',
+                  style: TextStyle(fontSize: 10, color: SynapTheme.statusSafe, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
           ],
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CallIndicator(compact: true),
+        actions: [
+          // Dedicated Admin / SOC Console Entry
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              backgroundColor: SynapTheme.surface,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: SynapTheme.surfaceBorder),
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminScreen()),
+              );
+            },
+            icon: const Icon(Icons.admin_panel_settings, size: 18, color: SynapTheme.primaryCyan),
+            label: const Text(
+              'SOC Admin',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: SynapTheme.primaryCyan),
+            ),
           ),
+          const SizedBox(width: 12),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // GPay-style Search / Pay Any Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: SynapTheme.surface,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: SynapTheme.surfaceBorder),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.search, color: SynapTheme.textSecondary, size: 22),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Pay friends, phone number, or UPI ID',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: SynapTheme.textMuted,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.mic_none, color: SynapTheme.textSecondary, size: 22),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Google Pay 4 Circular Quick Action Icons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildQuickAction(
+                  context,
+                  icon: Icons.qr_code_scanner,
+                  label: 'Scan any\nQR code',
+                  onTap: () => _startTransfer(context, 'Grocery Merchant', '9876543210@upi'),
+                ),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.contacts_outlined,
+                  label: 'Pay\ncontacts',
+                  onTap: () => _startTransfer(context, 'Priya Sharma (Granddaughter)', 'priya.sharma@okaxis'),
+                ),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.account_balance_outlined,
+                  label: 'Bank\ntransfer',
+                  onTap: () => _startTransfer(context, 'SBI Reserve Account', 'SBIN00012894521'),
+                ),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.alternate_email,
+                  label: 'Pay UPI\nID',
+                  onTap: () => _startTransfer(context, 'Direct Beneficiary', 'transfer@okicici'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // People Section (GPay Iconic Round Avatars)
             const Text(
-              'Welcome back, Manoj',
+              'People',
               style: TextStyle(
-                fontSize: 14,
-                color: AegisTheme.textSecondary,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: SynapTheme.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
-            // Account Card
+            SizedBox(
+              height: 96,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildPersonAvatar(
+                    context,
+                    name: 'Priya',
+                    subtitle: 'Family',
+                    color: Colors.purple,
+                    onTap: () => _startTransfer(context, 'Priya Sharma (Granddaughter)', 'priya.sharma@okaxis'),
+                  ),
+                  _buildPersonAvatar(
+                    context,
+                    name: 'Ramesh',
+                    subtitle: 'Uncle',
+                    color: Colors.teal,
+                    onTap: () => _startTransfer(context, 'Ramesh Kumar (Uncle)', 'ramesh.kumar@okhdfcbank'),
+                  ),
+                  _buildPersonAvatar(
+                    context,
+                    name: 'Dr. Verma',
+                    subtitle: 'Clinic',
+                    color: Colors.blueAccent,
+                    onTap: () => _startTransfer(context, 'Dr. Anand Verma', 'dr.verma@upi'),
+                  ),
+                  _buildPersonAvatar(
+                    context,
+                    name: 'Govt Utility',
+                    subtitle: 'Electricity',
+                    color: Colors.orange,
+                    onTap: () => _startTransfer(context, 'BESCOM Electric Supply', 'bescom.billpay@sbi'),
+                  ),
+                  _buildPersonAvatar(
+                    context,
+                    name: 'Rajesh',
+                    subtitle: 'Friend',
+                    color: Colors.indigo,
+                    onTap: () => _startTransfer(context, 'Rajesh Malhotra', 'rajesh.m@okaxis'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Big, Elderly-Friendly Bank Balance Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(22.0),
+              padding: const EdgeInsets.all(20.0),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFF162544),
-                    Color(0xFF0F1A2E),
+                    Color(0xFF1B2435),
+                    Color(0xFF131926),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: AegisTheme.primaryBlue.withValues(alpha: 0.4)),
+                border: Border.all(color: SynapTheme.surfaceBorder, width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: AegisTheme.primaryBlue.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -96,30 +215,36 @@ class HomeScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Total Balance',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AegisTheme.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      const Row(
+                        children: [
+                          Icon(Icons.account_balance, size: 18, color: SynapTheme.primaryCyan),
+                          SizedBox(width: 8),
+                          Text(
+                            'State Bank of India •••• 4521',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: SynapTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AegisTheme.statusSafe.withValues(alpha: 0.15),
+                          color: SynapTheme.statusSafe.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.verified_user, size: 12, color: AegisTheme.statusSafe),
+                            Icon(Icons.shield, size: 12, color: SynapTheme.statusSafe),
                             SizedBox(width: 4),
                             Text(
                               'PROTECTED',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: AegisTheme.statusSafe,
+                                color: SynapTheme.statusSafe,
                               ),
                             ),
                           ],
@@ -127,92 +252,80 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   const Text(
-                    '₹4,85,230.00',
+                    'Available Bank Balance',
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 12,
+                      color: SynapTheme.textMuted,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '₹ 4,85,230.00',
+                    style: TextStyle(
+                      fontSize: 34,
                       fontWeight: FontWeight.w800,
-                      color: AegisTheme.textPrimary,
+                      color: SynapTheme.textPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Premier Savings •••• 4521',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AegisTheme.textMuted,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                      Text(
-                        'IFSC: SYNP0001289',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AegisTheme.textMuted,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Four Lakh Eighty-Five Thousand Two Hundred Thirty Rupees',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: SynapTheme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            // Primary Action Button: Send Money
+            const SizedBox(height: 20),
+
+            // Big, High-Contrast Send Button (Elderly Friendly)
             SizedBox(
               width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
+              height: 56,
+              child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AegisTheme.primaryBlue,
+                  backgroundColor: SynapTheme.primaryBlue,
                   foregroundColor: Colors.white,
-                  elevation: 4,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () {
-                  // Reset session for fresh measurement
-                  context.read<BiometricService>().resetSession();
-                  Navigator.pushNamed(context, '/transfer');
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.send_rounded, size: 20),
-                    SizedBox(width: 10),
-                    Text(
-                      'Transfer Funds (Live Demo)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ],
+                onPressed: () => _startTransfer(context, 'Beneficiary Account', '918273645012'),
+                icon: const Icon(Icons.send_rounded, size: 22),
+                label: const Text(
+                  'Make a Payment / Transfer (₹)',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 28),
-            // Security Protection Banner
+            const SizedBox(height: 24),
+
+            // Elderly-Friendly Scam Protection Notice
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AegisTheme.surface,
+                color: SynapTheme.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AegisTheme.surfaceBorder),
+                border: Border.all(color: SynapTheme.surfaceBorder),
               ),
               child: const Row(
                 children: [
                   Icon(
-                    Icons.security_update_good,
-                    color: AegisTheme.primaryCyan,
-                    size: 22,
+                    Icons.verified_user_outlined,
+                    color: SynapTheme.statusSafe,
+                    size: 24,
                   ),
                   SizedBox(width: 12),
                   Expanded(
@@ -220,19 +333,20 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Cognitive Duress Protection',
+                          'Synap Scam & Coercion Guard',
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AegisTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            color: SynapTheme.textPrimary,
                           ),
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Detects coercion and social engineering in real time via touch physics & telephony check.',
+                          'If someone orders you to transfer money while on a phone call, Synap automatically freezes the transfer for 15 minutes to keep your funds safe.',
                           style: TextStyle(
-                            fontSize: 11,
-                            color: AegisTheme.textSecondary,
+                            fontSize: 12,
+                            color: SynapTheme.textSecondary,
+                            height: 1.3,
                           ),
                         ),
                       ],
@@ -241,44 +355,124 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 28),
-            // Recent Transactions
+            const SizedBox(height: 20),
+
+            // Recent Transactions Section
             const Text(
-              'Recent Activity',
+              'Recent Transactions',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AegisTheme.textPrimary,
+                color: SynapTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             _buildTxnTile(
-              title: 'Amazon Online Retails',
-              subtitle: 'Debit Card • Today, 14:22',
-              amount: '-₹2,499.00',
+              title: 'Priya Sharma (Birthday Gift)',
+              subtitle: 'UPI • Paid from SBI • Today, 11:20 AM',
+              amount: '-₹5,000.00',
               isCredit: false,
-              icon: Icons.shopping_bag_outlined,
+              icon: Icons.person_outline,
             ),
             _buildTxnTile(
-              title: 'Salary Credit (TCS Global)',
-              subtitle: 'NEFT • Yesterday',
+              title: 'Monthly Pension Credit',
+              subtitle: 'NEFT • Direct Govt Deposit • Yesterday',
               amount: '+₹75,000.00',
               isCredit: true,
-              icon: Icons.account_balance_wallet_outlined,
+              icon: Icons.account_balance_outlined,
             ),
             _buildTxnTile(
-              title: 'Tata Power Mumbai',
-              subtitle: 'Utility Bill • 2 days ago',
+              title: 'Tata Power Electricity Bill',
+              subtitle: 'Utility • Automatic Clearing • 3 days ago',
               amount: '-₹1,840.00',
               isCredit: false,
               icon: Icons.bolt_outlined,
             ),
-            _buildTxnTile(
-              title: 'Swiggy UPI Transfer',
-              subtitle: 'UPI • 3 days ago',
-              amount: '-₹345.00',
-              isCredit: false,
-              icon: Icons.fastfood_outlined,
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _startTransfer(BuildContext context, String recipientName, String accountOrUpi) {
+    context.read<BiometricService>().resetSession();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TransferScreen(
+          initialRecipient: recipientName,
+          initialAccount: accountOrUpi,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAction(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: SynapTheme.surface,
+              shape: BoxShape.circle,
+              border: Border.all(color: SynapTheme.surfaceBorder, width: 1.2),
+            ),
+            child: Icon(icon, color: SynapTheme.primaryCyan, size: 24),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: SynapTheme.textPrimary,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonAvatar(
+    BuildContext context, {
+    required String name,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 18),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: color.withValues(alpha: 0.25),
+              child: Text(
+                name[0],
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              name,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: SynapTheme.textPrimary),
+            ),
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 10, color: SynapTheme.textMuted),
             ),
           ],
         ),
@@ -297,19 +491,19 @@ class HomeScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AegisTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AegisTheme.surfaceBorder),
+        color: SynapTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: SynapTheme.surfaceBorder),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AegisTheme.surfaceLight,
-              borderRadius: BorderRadius.circular(10),
+              color: SynapTheme.surfaceLight,
+              shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 20, color: AegisTheme.textSecondary),
+            child: Icon(icon, size: 20, color: SynapTheme.primaryCyan),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -321,7 +515,7 @@ class HomeScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AegisTheme.textPrimary,
+                    color: SynapTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -329,7 +523,7 @@ class HomeScreen extends StatelessWidget {
                   subtitle,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: AegisTheme.textMuted,
+                    color: SynapTheme.textMuted,
                   ),
                 ),
               ],
@@ -338,9 +532,9 @@ class HomeScreen extends StatelessWidget {
           Text(
             amount,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: isCredit ? AegisTheme.statusSafe : AegisTheme.textPrimary,
+              color: isCredit ? SynapTheme.statusSafe : SynapTheme.textPrimary,
             ),
           ),
         ],

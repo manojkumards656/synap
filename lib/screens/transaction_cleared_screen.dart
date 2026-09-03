@@ -3,10 +3,12 @@ import 'package:intl/intl.dart';
 import '../core/constants.dart';
 import '../core/theme.dart';
 import '../models/biometric_snapshot.dart';
+import 'admin_screen.dart';
 
 class TransactionClearedScreen extends StatelessWidget {
   final double amount;
   final String recipientIban;
+  final String recipientName;
   final BiometricSnapshot snapshot;
   final TransactionDecision decision;
 
@@ -14,6 +16,7 @@ class TransactionClearedScreen extends StatelessWidget {
     super.key,
     required this.amount,
     required this.recipientIban,
+    this.recipientName = 'Beneficiary',
     required this.snapshot,
     required this.decision,
   });
@@ -26,6 +29,7 @@ class TransactionClearedScreen extends StatelessWidget {
     final isWarn = decision == TransactionDecision.warnAndClear;
 
     return Scaffold(
+      backgroundColor: SynapTheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
@@ -37,102 +41,110 @@ class TransactionClearedScreen extends StatelessWidget {
                 width: 90,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: (isWarn ? AegisTheme.statusElevated : AegisTheme.statusSafe)
+                  color: (isWarn ? SynapTheme.statusElevated : SynapTheme.statusSafe)
                       .withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isWarn ? AegisTheme.statusElevated : AegisTheme.statusSafe,
+                    color: isWarn ? SynapTheme.statusElevated : SynapTheme.statusSafe,
                     width: 3,
                   ),
                 ),
                 child: Icon(
                   isWarn ? Icons.warning_amber_rounded : Icons.check_circle_outline,
                   size: 52,
-                  color: isWarn ? AegisTheme.statusElevated : AegisTheme.statusSafe,
+                  color: isWarn ? SynapTheme.statusElevated : SynapTheme.statusSafe,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Text(
-                isWarn ? 'Transfer Cleared with Caution' : 'Transfer Successfully Settled',
+                isWarn ? 'Payment Cleared with Step-Up' : 'Payment Successfully Sent',
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: AegisTheme.textPrimary,
+                  color: SynapTheme.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
-                'Funds cleared via Real-Time Settlement Rails',
+                'Settled via Real-Time UPI / IMPS Banking Rails',
                 style: TextStyle(
-                  fontSize: 13,
-                  color: isWarn ? AegisTheme.statusElevated : AegisTheme.statusSafe,
+                  fontSize: 14,
+                  color: isWarn ? SynapTheme.statusElevated : SynapTheme.statusSafe,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
               // Transaction Details Card
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AegisTheme.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AegisTheme.surfaceBorder),
+                  color: SynapTheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: SynapTheme.surfaceBorder),
                 ),
                 child: Column(
                   children: [
                     _buildRow('Amount Transferred', '₹ $formattedAmount', isBold: true),
-                    const Divider(color: AegisTheme.surfaceBorder, height: 24),
-                    _buildRow('Recipient Account', recipientIban, isMonospace: true),
-                    const Divider(color: AegisTheme.surfaceBorder, height: 24),
-                    _buildRow('Settlement Speed', '< 1 second (Instant)'),
-                    const Divider(color: AegisTheme.surfaceBorder, height: 24),
-                    _buildRow('Cognitive Duress Index (CDI)', '${snapshot.cdiScore.toStringAsFixed(2)} / 1.00'),
-                    const Divider(color: AegisTheme.surfaceBorder, height: 24),
-                    _buildRow('Biometrics Engine Latency', '${snapshot.computeTimeMs.toStringAsFixed(2)} ms'),
+                    const Divider(color: SynapTheme.surfaceBorder, height: 22),
+                    _buildRow('Recipient', recipientName),
+                    const Divider(color: SynapTheme.surfaceBorder, height: 22),
+                    _buildRow('UPI ID / Account', recipientIban, isMonospace: true),
+                    const Divider(color: SynapTheme.surfaceBorder, height: 22),
+                    _buildRow('Settlement Speed', '< 1 sec (Real-Time)'),
+                    const Divider(color: SynapTheme.surfaceBorder, height: 22),
+                    _buildRow('Duress Risk Score', '${snapshot.cdiScore.toStringAsFixed(2)} (Safe)'),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               // Security Audit Note
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AegisTheme.surfaceLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.lock_outline, size: 16, color: AegisTheme.textSecondary),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Audit Log ID: #SYNP-84920 | Zero-PII cryptographically verified',
-                        style: TextStyle(fontSize: 10, color: AegisTheme.textMuted),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminScreen()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: SynapTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.shield_outlined, size: 16, color: SynapTheme.primaryCyan),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Audit Signature: #SYNP-84920 • Tap to view SOC Details →',
+                          style: TextStyle(fontSize: 11, color: SynapTheme.textSecondary),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 54,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AegisTheme.surfaceLight,
-                    foregroundColor: AegisTheme.textPrimary,
-                    side: const BorderSide(color: AegisTheme.surfaceBorder),
+                    backgroundColor: SynapTheme.surfaceLight,
+                    foregroundColor: SynapTheme.textPrimary,
+                    side: const BorderSide(color: SynapTheme.surfaceBorder),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   onPressed: () {
                     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
                   },
                   child: const Text(
-                    'Return to Dashboard',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    'Done / Back to Home',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -149,17 +161,17 @@ class TransactionClearedScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: AegisTheme.textSecondary),
+          style: const TextStyle(fontSize: 14, color: SynapTheme.textSecondary),
         ),
         const SizedBox(width: 12),
         Flexible(
           child: Text(
             value,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
               fontFamily: isMonospace ? 'monospace' : null,
-              color: isBold ? AegisTheme.statusSafe : AegisTheme.textPrimary,
+              color: isBold ? SynapTheme.statusSafe : SynapTheme.textPrimary,
             ),
             textAlign: TextAlign.right,
             overflow: TextOverflow.ellipsis,

@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AegisTheme {
-  // Color Palette
-  static const Color background = Color(0xFF0A0F1D);
-  static const Color surface = Color(0xFF111927);
-  static const Color surfaceLight = Color(0xFF1B2537);
-  static const Color surfaceBorder = Color(0xFF1E2C42);
+class SynapTheme {
+  // Color Palette - Sleek Google Pay Dark Inspired
+  static const Color background = Color(0xFF0F141C);
+  static const Color surface = Color(0xFF19202D);
+  static const Color surfaceLight = Color(0xFF242D3D);
+  static const Color surfaceBorder = Color(0xFF2D384D);
 
-  static const Color primaryBlue = Color(0xFF2575FC);
+  static const Color primaryBlue = Color(0xFF1A73E8);     // Google Pay Blue
   static const Color primaryCyan = Color(0xFF00D2FF);
+  static const Color primaryAccent = Color(0xFF4285F4);
 
-  static const Color statusSafe = Color(0xFF10B981);      // Emerald 500
-  static const Color statusElevated = Color(0xFFF59E0B);  // Amber 500
-  static const Color statusCritical = Color(0xFFEF4444);  // Red 500
+  static const Color statusSafe = Color(0xFF0F9D58);      // Google Green 
+  static const Color statusElevated = Color(0xFFF4B400);  // Google Amber
+  static const Color statusCritical = Color(0xFFDB4437);  // Google Red
 
   static const Color textPrimary = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textMuted = Color(0xFF64748B);
+  static const Color textSecondary = Color(0xFFA0AEC0);
+  static const Color textMuted = Color(0xFF718096);
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -35,24 +36,27 @@ class AegisTheme {
           displayLarge: const TextStyle(
             color: textPrimary,
             fontWeight: FontWeight.w700,
-            letterSpacing: -1.0,
+            fontSize: 32,
+            letterSpacing: -0.5,
           ),
           displayMedium: const TextStyle(
             color: textPrimary,
             fontWeight: FontWeight.w700,
+            fontSize: 26,
             letterSpacing: -0.5,
           ),
           titleLarge: const TextStyle(
             color: textPrimary,
             fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
           bodyLarge: const TextStyle(
             color: textPrimary,
-            fontSize: 16,
+            fontSize: 17, // Generous and legible for seniors
           ),
           bodyMedium: const TextStyle(
             color: textSecondary,
-            fontSize: 14,
+            fontSize: 15,
           ),
         ),
       ),
@@ -60,8 +64,8 @@ class AegisTheme {
         color: surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: surfaceBorder, width: 1),
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: surfaceBorder, width: 1.2),
         ),
       ),
       appBarTheme: const AppBarTheme(
@@ -71,14 +75,13 @@ class AegisTheme {
         iconTheme: IconThemeData(color: textPrimary),
         titleTextStyle: TextStyle(
           color: textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 19,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
   }
 
-  // Returns color corresponding to CDI value
   static Color getCDIColor(double cdi) {
     if (cdi < 0.30) {
       return statusSafe;
@@ -89,7 +92,6 @@ class AegisTheme {
     }
   }
 
-  // Returns status text label
   static String getCDILabel(double cdi) {
     if (cdi < 0.30) {
       return 'SAFE';
@@ -100,3 +102,6 @@ class AegisTheme {
     }
   }
 }
+
+// Backwards compatibility alias
+typedef AegisTheme = SynapTheme;

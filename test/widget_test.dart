@@ -129,8 +129,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify presence of title and key banking elements
-    expect(find.text('Synap Guardian'), findsOneWidget);
-    expect(find.text('Transfer Funds (Live Demo)'), findsOneWidget);
-    expect(find.text('Total Balance'), findsOneWidget);
+    expect(find.text('Synap Pay'), findsOneWidget);
+    expect(find.text('SOC Admin'), findsOneWidget);
+    expect(find.text('Available Bank Balance'), findsOneWidget);
   });
 }

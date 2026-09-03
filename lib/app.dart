@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'biometrics/biometric_service.dart';
 import 'core/theme.dart';
+import 'screens/admin_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/transfer_screen.dart';
 import 'telephony/call_state_service.dart';
@@ -19,11 +20,12 @@ class SynapApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Synap',
         debugShowCheckedModeBanner: false,
-        theme: AegisTheme.darkTheme,
+        theme: SynapTheme.darkTheme,
         initialRoute: '/',
         routes: {
           '/': (context) => const HomeScreen(),
           '/transfer': (context) => const TransferScreen(),
+          '/admin': (context) => const AdminScreen(),
         },
       ),
     );

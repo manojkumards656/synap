@@ -29,7 +29,7 @@ class NumericKeypad extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: keys.map((row) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.only(bottom: 10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: row.map((label) {
@@ -113,41 +113,47 @@ class _KeypadButtonState extends State<_KeypadButton> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
-        height: 58,
+        height: 64, // Large, elderly-friendly target
         decoration: BoxDecoration(
           color: _isPressed
-              ? AegisTheme.primaryBlue.withValues(alpha: 0.25)
-              : AegisTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(14),
+              ? SynapTheme.primaryBlue.withValues(alpha: 0.3)
+              : SynapTheme.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: _isPressed
-                ? AegisTheme.primaryBlue
-                : AegisTheme.surfaceBorder,
-            width: 1.2,
+                ? SynapTheme.primaryCyan
+                : SynapTheme.surfaceBorder,
+            width: 1.5,
           ),
           boxShadow: _isPressed
               ? [
                   BoxShadow(
-                    color: AegisTheme.primaryBlue.withValues(alpha: 0.3),
-                    blurRadius: 10,
-                    spreadRadius: 1,
+                    color: SynapTheme.primaryBlue.withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    spreadRadius: 2,
                   )
                 ]
-              : null,
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Center(
           child: widget.label == '⌫'
               ? const Icon(
                   Icons.backspace_outlined,
-                  color: AegisTheme.textPrimary,
-                  size: 22,
+                  color: SynapTheme.textPrimary,
+                  size: 26,
                 )
               : Text(
                   widget.label,
                   style: const TextStyle(
-                    color: AegisTheme.textPrimary,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
+                    color: SynapTheme.textPrimary,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
         ),
