@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../core/theme.dart';
+import 'blinking_cursor.dart';
 
 class AmountField extends StatelessWidget {
   final String rawAmount;
@@ -15,20 +16,24 @@ class AmountField extends StatelessWidget {
   });
 
   String _formatAmount(String raw) {
-    if (raw.isEmpty) return '0';
+    if (raw.isEmpty) return '';
     final parsed = double.tryParse(raw) ?? 0.0;
     final formatter = NumberFormat('#,##,###', 'en_IN');
     return formatter.format(parsed);
   }
 
   String _toWords(String raw) {
+    if (raw.isEmpty) return 'Tap to enter amount in Rupees';
     final val = double.tryParse(raw) ?? 0.0;
     if (val == 0) return 'Zero Rupees';
     if (val == 50) return 'Fifty Rupees';
+    if (val == 100) return 'One Hundred Rupees';
     if (val == 500) return 'Five Hundred Rupees';
     if (val == 1000) return 'One Thousand Rupees';
+    if (val == 2000) return 'Two Thousand Rupees';
     if (val == 5000) return 'Five Thousand Rupees';
     if (val == 10000) return 'Ten Thousand Rupees';
+    if (val == 25000) return 'Twenty-Five Thousand Rupees';
     if (val == 50000) return 'Fifty Thousand Rupees';
     if (val == 100000) return 'One Lakh Rupees';
     if (val == 500000) return 'Five Lakh Rupees';
@@ -37,9 +42,9 @@ class AmountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final display = _formatAmount(rawAmount);
+    final isEmpty = rawAmount.isEmpty;
+    final display = isEmpty ? (isSelected ? '' : '0') : _formatAmount(rawAmount);
     final inWords = _toWords(rawAmount);
-    final isEmpty = rawAmount.isEmpty || rawAmount == '0';
 
     return GestureDetector(
       onTap: onTap,
@@ -103,15 +108,26 @@ class AmountField extends StatelessWidget {
                     color: SynapTheme.primaryCyan,
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    display,
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                      color: isEmpty ? SynapTheme.textMuted : SynapTheme.textPrimary,
-                    ),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (display.isNotEmpty)
+                        Flexible(
+                          child: Text(
+                            display,
+                            style: TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                              color: isEmpty ? SynapTheme.textMuted : SynapTheme.textPrimary,
+                            ),
+                          ),
+                        ),
+                      if (isSelected)
+                        const BlinkingCursor(height: 32, width: 3.0),
+                    ],
                   ),
                 ),
               ],
@@ -131,10 +147,10 @@ class AmountField extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     inWords,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: SynapTheme.textSecondary,
+                      color: isEmpty ? SynapTheme.textMuted : SynapTheme.textSecondary,
                     ),
                   ),
                 ],

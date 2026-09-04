@@ -164,12 +164,12 @@ class AdminScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'CDI = (0.20 × ${(snapshot.iciVariance).toStringAsFixed(2)}) + '
-                          '(0.15 × ${(snapshot.dwellStdDev).toStringAsFixed(2)}) + '
-                          '(0.15 × ${(snapshot.curvatureEntropy).toStringAsFixed(2)}) + '
-                          '(0.20 × ${(snapshot.hesitationRatio).toStringAsFixed(2)}) + '
-                          '(0.10 × ${(snapshot.burstRatio).toStringAsFixed(2)}) + '
-                          '(0.20 × ${bioService.isCallActive ? "1.00" : "0.00"}) = ${cdi.toStringAsFixed(3)}',
+                          'CDI = (0.15 × ${(snapshot.iciVariance).toStringAsFixed(2)}) + '
+                          '(0.10 × ${(snapshot.dwellStdDev).toStringAsFixed(2)}) + '
+                          '(0.05 × ${(snapshot.curvatureEntropy).toStringAsFixed(2)}) + '
+                          '(0.15 × ${(snapshot.hesitationRatio).toStringAsFixed(2)}) + '
+                          '(0.20 × ${(snapshot.burstRatio).toStringAsFixed(2)}) + '
+                          '(0.35 × ${bioService.isCallActive ? "1.00" : "0.00"})${bioService.isCallActive && snapshot.burstRatio > 0.30 ? " + Panic Boost" : ""} = ${cdi.toStringAsFixed(3)}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontFamily: 'monospace',
@@ -188,54 +188,50 @@ class AdminScreen extends StatelessWidget {
             // Deep Signal Breakdown
             const Text(
               'Biometric Signals Breakdown',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: SynapTheme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: SynapTheme.textPrimary),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             _buildSignalCard(
-              title: 'Inter-Character Interval (ICI) Variance',
-              weight: 'Weight: 20%',
+              title: 'Flight Interval Variance (ICI)',
+              weight: 'Weight: 15%',
               rawValue: '${snapshot.rawIciVariance.toStringAsFixed(0)} ms²',
               normalized: snapshot.iciVariance,
               description: 'Measures typing rhythm irregularities caused by listening to dictation over phone.',
             ),
             _buildSignalCard(
               title: 'Key Dwell Time Std Dev',
-              weight: 'Weight: 15%',
+              weight: 'Weight: 10%',
               rawValue: '${snapshot.rawDwellStdDev.toStringAsFixed(1)} ms',
               normalized: snapshot.dwellStdDev,
               description: 'Measures key-press duration tremors and stress-induced motor hesitation.',
             ),
             _buildSignalCard(
               title: 'Pointer Trajectory Curvature Entropy',
-              weight: 'Weight: 15%',
+              weight: 'Weight: 5%',
               rawValue: 'H = ${snapshot.curvatureEntropy.toStringAsFixed(3)} / 3.0',
               normalized: snapshot.curvatureEntropy,
               description: 'Shannon entropy across directional angles between consecutive taps. High = chaotic zigzag.',
             ),
             _buildSignalCard(
-              title: 'Hesitation Ratio (>2.0s pauses)',
-              weight: 'Weight: 20%',
+              title: 'Hesitation Ratio (>0.9s pauses)',
+              weight: 'Weight: 15%',
               rawValue: '${(snapshot.hesitationRatio * 100).toStringAsFixed(0)}% of taps',
               normalized: snapshot.hesitationRatio,
               description: 'Detects prolonged delays while the victim waits for the fraudster\'s next instruction.',
             ),
             _buildSignalCard(
-              title: 'Panic Burst Ratio (<120ms gaps)',
-              weight: 'Weight: 10%',
-              rawValue: '${(snapshot.burstRatio * 100).toStringAsFixed(0)}% of taps',
+              title: 'Panic Burst / Fast Rush Ratio (<350ms)',
+              weight: 'Weight: 20%',
+              rawValue: '${(snapshot.burstRatio * 100).toStringAsFixed(0)}% rush',
               normalized: snapshot.burstRatio,
-              description: 'Detects rapid panicked keystroke bursts immediately following phone dictation.',
+              description: 'Detects frantic keystroke bursts and accelerated typing under live phone pressure.',
             ),
             _buildSignalCard(
               title: 'Active Voice Call Telephony Flag',
-              weight: 'Weight: 20%',
+              weight: 'Weight: 35%',
               rawValue: bioService.isCallActive ? 'CALL ACTIVE (True)' : 'IDLE (False)',
               normalized: bioService.isCallActive ? 1.0 : 0.0,
-              description: 'Verified via Android TelephonyManager/PhoneState. Acts as the coercion multiplier.',
+              description: 'Verified via Android TelephonyManager/PhoneState. Acts as the primary coercion context.',
             ),
             const SizedBox(height: 20),
 

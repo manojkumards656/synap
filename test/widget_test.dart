@@ -130,7 +130,7 @@ void main() {
 
     // Verify presence of title and key banking elements
     expect(find.text('Synap Pay'), findsOneWidget);
-    expect(find.text('SOC Admin'), findsOneWidget);
+    expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
     expect(find.text('Available Bank Balance'), findsOneWidget);
   });
 }

@@ -46,12 +46,12 @@ class BiometricSnapshot {
   /// List of human-readable warnings for elevated signals
   List<String> get activeDuressFlags {
     final flags = <String>[];
-    if (callActive > 0.5) flags.add('Active telephony call detected');
-    if (hesitationRatio > 0.20) flags.add('Abnormal dictation pauses (>2.0s)');
-    if (iciVariance > 0.40) flags.add('Irregular cadence & flight variability');
-    if (burstRatio > 0.15) flags.add('Frantic panic input bursts (<120ms)');
-    if (curvatureEntropy > 0.50) flags.add('Chaotic pointer trajectory & wavering');
-    if (dwellStdDev > 0.40) flags.add('High dwell time tremor/inconsistency');
+    if (callActive > 0.5) flags.add('Active cellular call detected during transfer');
+    if (burstRatio > 0.25) flags.add('Frantic panic rush typing (<350ms per key)');
+    if (hesitationRatio > 0.20) flags.add('Abnormal dictation listening pauses (>0.9s)');
+    if (iciVariance > 0.35) flags.add('Irregular cadence & flight variability');
+    if (dwellStdDev > 0.35) flags.add('High dwell time tremor / finger inconsistency');
+    if (curvatureEntropy > 0.45) flags.add('Chaotic pointer trajectory & wavering');
     return flags;
   }
 }

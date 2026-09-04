@@ -54,7 +54,13 @@ class FeatureExtractor {
           .clamp(0.0, 1.0);
 
       hesitationRatio = (hesitationCount / totalIciCount).clamp(0.0, 1.0);
-      burstRatio = (burstCount / totalIciCount).clamp(0.0, 1.0);
+      
+      // Speed Anomaly / Cadence Rush:
+      // Normal calm entry on mobile keypad: ~550ms - 850ms per key
+      // Panic / hurried entry under pressure: < 350ms per key
+      final speedRush = ((550.0 - meanIci) / 250.0).clamp(0.0, 1.0);
+      final rawBurstRatio = (burstCount / totalIciCount).clamp(0.0, 1.0);
+      burstRatio = max(rawBurstRatio, speedRush);
     }
 
     // 2. Dwell Times
@@ -87,13 +93,25 @@ class FeatureExtractor {
     // 4. Telephony Status
     final callValue = isCallActive ? 1.0 : 0.0;
 
-    // 5. Provisional CDI calculation
-    final cdi = (CDIConstants.wIciVariance * normalizedIciVariance) +
+    // 5. Provisional CDI calculation with Coercion Synergy
+    double cdi = (CDIConstants.wIciVariance * normalizedIciVariance) +
         (CDIConstants.wDwellStdDev * normalizedDwellStdDev) +
         (CDIConstants.wCurvatureEntropy * curvatureEntropy) +
         (CDIConstants.wHesitationRatio * hesitationRatio) +
         (CDIConstants.wBurstRatio * burstRatio) +
         (CDIConstants.wCallActive * callValue);
+
+    // Dynamic Coercion Synergy:
+    // If phone call is active AND user is rushing (burstRatio > 0.3)
+    // or hesitating (hesitationRatio > 0.15), amplify the score.
+    if (callValue > 0.5) {
+      if (burstRatio > 0.30) {
+        cdi += 0.25 * burstRatio;
+      }
+      if (hesitationRatio > 0.15) {
+        cdi += 0.20 * hesitationRatio;
+      }
+    }
 
     stopwatch.stop();
     final elapsedMs = stopwatch.elapsedMicroseconds / 1000.0;

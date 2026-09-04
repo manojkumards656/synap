@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
+import 'blinking_cursor.dart';
 
 class RecipientField extends StatelessWidget {
   final String recipientName;
@@ -17,7 +18,14 @@ class RecipientField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final display = accountOrUpi.isEmpty ? 'Tap to enter UPI ID or A/C' : accountOrUpi;
+    final isEmpty = accountOrUpi.isEmpty;
+    final display = isEmpty ? (isSelected ? '' : 'Tap to enter UPI ID or A/C') : accountOrUpi;
+    final title = recipientName.isNotEmpty
+        ? recipientName
+        : (isEmpty ? 'New Beneficiary' : 'Account Transfer');
+    final subtitle = recipientName.isNotEmpty
+        ? 'Verified Banking Beneficiary'
+        : 'Enter recipient account or UPI ID';
 
     return GestureDetector(
       onTap: onTap,
@@ -65,22 +73,27 @@ class RecipientField extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            recipientName.isNotEmpty ? recipientName : 'Paying Beneficiary',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: SynapTheme.textPrimary,
+                          Flexible(
+                            child: Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: SynapTheme.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.verified, size: 16, color: SynapTheme.statusSafe),
+                          if (recipientName.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            const Icon(Icons.verified, size: 16, color: SynapTheme.statusSafe),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 2),
-                      const Text(
-                        'Banking Name: S.B.I. Treasury / Direct Account',
-                        style: TextStyle(
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: SynapTheme.textMuted,
                         ),
@@ -114,14 +127,24 @@ class RecipientField extends StatelessWidget {
                   const Icon(Icons.alternate_email, size: 16, color: SynapTheme.primaryCyan),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      display,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'monospace',
-                        color: accountOrUpi.isEmpty ? SynapTheme.textMuted : SynapTheme.textPrimary,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (display.isNotEmpty)
+                          Flexible(
+                            child: Text(
+                              display,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'monospace',
+                                color: isEmpty ? SynapTheme.textMuted : SynapTheme.textPrimary,
+                              ),
+                            ),
+                          ),
+                        if (isSelected)
+                          const BlinkingCursor(height: 18, width: 2.2),
+                      ],
                     ),
                   ),
                 ],

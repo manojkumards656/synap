@@ -42,29 +42,18 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          // Dedicated Admin / SOC Console Entry
-          TextButton.icon(
-            style: TextButton.styleFrom(
-              backgroundColor: SynapTheme.surface,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: const BorderSide(color: SynapTheme.surfaceBorder),
-              ),
-            ),
+          // Discreet Admin Console Access (No UI clutter)
+          IconButton(
+            tooltip: 'Fraud SOC Admin Console',
+            icon: const Icon(Icons.shield_outlined, color: SynapTheme.primaryCyan),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const AdminScreen()),
               );
             },
-            icon: const Icon(Icons.admin_panel_settings, size: 18, color: SynapTheme.primaryCyan),
-            label: const Text(
-              'SOC Admin',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: SynapTheme.primaryCyan),
-            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -73,28 +62,31 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // GPay-style Search / Pay Any Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: SynapTheme.surface,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: SynapTheme.surfaceBorder),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.search, color: SynapTheme.textSecondary, size: 22),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Pay friends, phone number, or UPI ID',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: SynapTheme.textMuted,
+            GestureDetector(
+              onTap: () => _startTransfer(context, '', ''),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: SynapTheme.surface,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: SynapTheme.surfaceBorder),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.search, color: SynapTheme.textSecondary, size: 22),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Pay friends, phone number, or UPI ID',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: SynapTheme.textMuted,
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(Icons.mic_none, color: SynapTheme.textSecondary, size: 22),
-                ],
+                    Icon(Icons.mic_none, color: SynapTheme.textSecondary, size: 22),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -107,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                   context,
                   icon: Icons.qr_code_scanner,
                   label: 'Scan any\nQR code',
-                  onTap: () => _startTransfer(context, 'Grocery Merchant', '9876543210@upi'),
+                  onTap: () => _startTransfer(context, '', ''),
                 ),
                 _buildQuickAction(
                   context,
@@ -119,13 +111,13 @@ class HomeScreen extends StatelessWidget {
                   context,
                   icon: Icons.account_balance_outlined,
                   label: 'Bank\ntransfer',
-                  onTap: () => _startTransfer(context, 'SBI Reserve Account', 'SBIN00012894521'),
+                  onTap: () => _startTransfer(context, '', ''),
                 ),
                 _buildQuickAction(
                   context,
                   icon: Icons.alternate_email,
                   label: 'Pay UPI\nID',
-                  onTap: () => _startTransfer(context, 'Direct Beneficiary', 'transfer@okicici'),
+                  onTap: () => _startTransfer(context, '', ''),
                 ),
               ],
             ),
@@ -285,7 +277,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Big, High-Contrast Send Button (Elderly Friendly)
+            // Big Clean Button: Starts transfer with EMPTY bank number & amount
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -298,7 +290,7 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () => _startTransfer(context, 'Beneficiary Account', '918273645012'),
+                onPressed: () => _startTransfer(context, '', ''),
                 icon: const Icon(Icons.send_rounded, size: 22),
                 label: const Text(
                   'Make a Payment / Transfer (₹)',

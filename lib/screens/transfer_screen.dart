@@ -6,7 +6,6 @@ import '../core/theme.dart';
 import '../telephony/call_state_service.dart';
 import '../widgets/amount_field.dart';
 import '../widgets/call_indicator.dart';
-import '../widgets/cdi_gauge.dart';
 import '../widgets/numeric_keypad.dart';
 import '../widgets/recipient_field.dart';
 import 'admin_screen.dart';
@@ -21,8 +20,8 @@ class TransferScreen extends StatefulWidget {
 
   const TransferScreen({
     super.key,
-    this.initialRecipient = 'Priya Sharma (Granddaughter)',
-    this.initialAccount = 'priya.sharma@okaxis',
+    this.initialRecipient = '',
+    this.initialAccount = '',
   });
 
   @override
@@ -30,16 +29,19 @@ class TransferScreen extends StatefulWidget {
 }
 
 class _TransferScreenState extends State<TransferScreen> {
-  ActiveField _selectedField = ActiveField.amount;
+  late ActiveField _selectedField;
   late String _recipientName;
   late String _accountText;
-  String _amountText = '50000';
+  String _amountText = '';
 
   @override
   void initState() {
     super.initState();
     _recipientName = widget.initialRecipient;
     _accountText = widget.initialAccount;
+
+    // Start with recipient field if empty, otherwise focus on amount
+    _selectedField = _accountText.isEmpty ? ActiveField.recipient : ActiveField.amount;
 
     // Sync active call state to biometric service
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -75,24 +77,36 @@ class _TransferScreenState extends State<TransferScreen> {
       } else {
         if (_amountText.isNotEmpty) {
           _amountText = _amountText.substring(0, _amountText.length - 1);
-          if (_amountText.isEmpty) _amountText = '0';
         }
       }
     });
   }
 
   void _executeTransfer() {
+    if (_amountText.isEmpty || (double.tryParse(_amountText) ?? 0) <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter an amount to transfer.'),
+          backgroundColor: SynapTheme.statusElevated,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      setState(() => _selectedField = ActiveField.amount);
+      return;
+    }
+
     final bioService = context.read<BiometricService>();
     final callService = context.read<CallStateService>();
 
     // Ensure call state is up-to-date
     bioService.updateCallState(callService.isCallActive);
 
-    final amount = double.tryParse(_amountText) ?? 50000.0;
+    final amount = double.tryParse(_amountText) ?? 0.0;
     final decision = bioService.evaluateTransaction(amount);
 
     final snapshot = bioService.currentSnapshot;
-    final finalAccount = _accountText.isEmpty ? '918273645012@sbi' : _accountText;
+    final finalAccount = _accountText.isEmpty ? 'Direct Transfer Account' : _accountText;
+    final finalRecipient = _recipientName.isEmpty ? 'Beneficiary' : _recipientName;
 
     if (decision == TransactionDecision.escrow) {
       Navigator.pushReplacement(
@@ -101,7 +115,7 @@ class _TransferScreenState extends State<TransferScreen> {
           builder: (_) => EscrowHoldScreen(
             amount: amount,
             recipientIban: finalAccount,
-            recipientName: _recipientName,
+            recipientName: finalRecipient,
             snapshot: snapshot,
             isCallActive: bioService.isCallActive,
           ),
@@ -114,7 +128,7 @@ class _TransferScreenState extends State<TransferScreen> {
           builder: (_) => TransactionClearedScreen(
             amount: amount,
             recipientIban: finalAccount,
-            recipientName: _recipientName,
+            recipientName: finalRecipient,
             snapshot: snapshot,
             decision: decision,
           ),
@@ -134,15 +148,16 @@ class _TransferScreenState extends State<TransferScreen> {
     }
 
     final currentCDI = bioService.currentCDI;
+    final displayAmount = _amountText.isEmpty ? '0' : _amountText;
 
     return Scaffold(
       backgroundColor: SynapTheme.background,
       appBar: AppBar(
-        title: const Text('Send Money (INR)'),
+        title: const Text('Send Money (₹)'),
         actions: [
           IconButton(
-            tooltip: 'View Fraud SOC Analytics',
-            icon: const Icon(Icons.admin_panel_settings_outlined, color: SynapTheme.primaryCyan),
+            tooltip: 'Fraud SOC Admin Console',
+            icon: const Icon(Icons.shield_outlined, color: SynapTheme.primaryCyan),
             onPressed: () {
               Navigator.push(
                 context,
@@ -159,62 +174,48 @@ class _TransferScreenState extends State<TransferScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Scrollable Section: Input Fields, CDI Gauge, and Elderly-Friendly status
+            // Clean User Input Area (No admin clutter!)
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                 child: Column(
                   children: [
-                    // Verified Recipient Box (Indian UPI / Bank Account)
+                    // Recipient Field (Starts empty when tapping Make a Payment)
                     RecipientField(
                       recipientName: _recipientName,
                       accountOrUpi: _accountText,
                       isSelected: _selectedField == ActiveField.recipient,
                       onTap: () => setState(() => _selectedField = ActiveField.recipient),
                     ),
-                    const SizedBox(height: 12),
-                    // Amount Input Box with verbal conversion (e.g. ₹50,000)
+                    const SizedBox(height: 14),
+
+                    // Amount Field (Starts empty with blinking cursor)
                     AmountField(
                       rawAmount: _amountText,
                       isSelected: _selectedField == ActiveField.amount,
                       onTap: () => setState(() => _selectedField = ActiveField.amount),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
 
-                    // CDI Gauge with clean link to SOC analytics
+                    // Clean Security Note for Consumers (Reassuring, no jargon)
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
                         color: SynapTheme.surface,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: SynapTheme.surfaceBorder),
                       ),
-                      child: Column(
+                      child: const Row(
                         children: [
-                          CDIGauge(cdiValue: currentCDI),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const AdminScreen()),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.analytics_outlined, size: 14, color: SynapTheme.primaryCyan),
-                                  const SizedBox(width: 6),
-                                  const Text(
-                                    'View Full SOC Calculation & Math Breakdown →',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: SynapTheme.primaryCyan,
-                                    ),
-                                  ),
-                                ],
+                          Icon(Icons.lock_outline, size: 16, color: SynapTheme.statusSafe),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Protected by Synap Real-Time Scam Interception Rails',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: SynapTheme.textSecondary,
                               ),
                             ),
                           ),
@@ -225,7 +226,8 @@ class _TransferScreenState extends State<TransferScreen> {
                 ),
               ),
             ),
-            // Bottom Pinned Section: Large, Senior-Friendly Numeric Keypad & Submit CTA
+
+            // Bottom Pinned Section: Large Accessible Keypad & Action CTA
             Container(
               decoration: const BoxDecoration(
                 color: SynapTheme.background,
@@ -258,9 +260,9 @@ class _TransferScreenState extends State<TransferScreen> {
                           elevation: 3,
                         ),
                         onPressed: _executeTransfer,
-                        icon: const Icon(Icons.lock_outline, size: 20),
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 22),
                         label: Text(
-                          'Pay ₹${_amountText.isEmpty ? "0" : _amountText} Securely',
+                          _amountText.isEmpty ? 'Pay Securely (₹)' : 'Pay ₹$displayAmount Securely',
                           style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
